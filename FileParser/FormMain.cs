@@ -10,14 +10,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using ZedGraph;
-using JsonParser;
 
 namespace FileParser
 {
     public partial class FormMain : Form
     {
-        private Welcome wl;
-
         private List<Color> color = new List<Color>();
         public FormMain()
         {
@@ -162,7 +159,6 @@ namespace FileParser
 
         private void removeAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            wl = null;
 
             if (zedGraphControl1.GraphPane.CurveList.Count == 0)
                 return;
@@ -279,8 +275,9 @@ namespace FileParser
 
 
             string fileName = openFileDialog.FileName;
+            string fileText = System.IO.File.ReadAllText(fileName);
 
-            Welcome wl = Welcome.FromJson(fileName);
+            Welcome wl = Welcome.FromJson(fileText);
 
             DrawCass(wl);
         }

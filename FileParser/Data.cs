@@ -6,7 +6,7 @@
 //
 //    var welcome = Welcome.FromJson(jsonString);
 
-namespace JsonParser
+namespace FileParser
 {
     using System;
     using System.Collections.Generic;
@@ -269,12 +269,12 @@ namespace JsonParser
 
     public partial class Welcome
     {
-        public static Welcome FromJson(string json) => JsonConvert.DeserializeObject<Welcome>(json, JsonParser.Converter.Settings);
+        public static Welcome FromJson(string json) => JsonConvert.DeserializeObject<Welcome>(json, FileParser.Converter.Settings);
     }
 
     public static class Serialize
     {
-        public static string ToJson(this Welcome self) => JsonConvert.SerializeObject(self, JsonParser.Converter.Settings);
+        public static string ToJson(this Welcome self) => JsonConvert.SerializeObject(self, FileParser.Converter.Settings);
     }
 
     internal static class Converter
