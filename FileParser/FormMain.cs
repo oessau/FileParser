@@ -15,6 +15,9 @@ namespace FileParser
 {
     public partial class FormMain : Form
     {
+        PointPairList[][] points;
+        PointPairList[][] thresholds;
+
         private List<Color> color = new List<Color>();
         public FormMain()
         {
@@ -279,30 +282,72 @@ namespace FileParser
 
             Welcome wl = Welcome.FromJson(fileText);
 
-            DrawCass(wl);
+            points = new PointPairList[wl.AssessmentMeasurements.Count][];
+            thresholds = new PointPairList[wl.AssessmentMeasurements.Count][];
+
+            for (int i = 0; i < wl.AssessmentMeasurements.Count; i++)
+            {
+                points[i] = new PointPairList[wl.AssessmentMeasurements[i].SensorMeasurements.Count];
+                thresholds[i] = new PointPairList[wl.AssessmentMeasurements[i].SensorMeasurements.Count];
+                for (int j = 0; j < wl.AssessmentMeasurements[i].SensorMeasurements.Count; j++)
+                {
+                    
+                    points[i][j] = new PointPairList();
+
+                    
+                        string amp = wl.AssessmentMeasurements[i].SensorMeasurements[j].CalibrationShot.ShotData.Amplitudes;
+                        string tof = wl.AssessmentMeasurements[i].SensorMeasurements[j].CalibrationShot.ShotData.TimeOfFlights;
+                        
+                        byte[] dataAmp = Convert.FromBase64String(amp);
+                        byte[] dataTof = Convert.FromBase64String(tof);
+                        //ushort sample;
+
+                        for (int n = 0; n < dataAmp.Length/2; n++)
+                        {
+                            double Y = (double)BitConverter.ToUInt16(dataAmp, n * 2) % 128;
+                            double X = (double)BitConverter.ToUInt32(dataTof, n * 4) / 1000000;
+
+                            points[i][j].Add(new PointPair(X, 0));
+                            points[i][j].Add(new PointPair(X, Y));
+                            points[i][j].Add(new PointPair(X, 0));
+                        }
+                    
+
+
+                    thresholds[i][j] = new PointPairList();
+                    int last = wl.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges.Count - 1;
+                    for (int k = 0; k < last; k++)
+                    {
+                        thresholds[i][j].Add(new PointPair((double)wl.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[k].TimeOfFlightInNanoseconds / 1000,
+                                                          (double)wl.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[k].ThresholdInDecibel));
+                        thresholds[i][j].Add(new PointPair((double)wl.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[k + 1].TimeOfFlightInNanoseconds / 1000,
+                                                          (double)wl.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[k].ThresholdInDecibel));
+                    }
+
+                    thresholds[i][j].Add(new PointPair((double)wl.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[last].TimeOfFlightInNanoseconds / 1000,
+                                                         (double)wl.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[last].ThresholdInDecibel));
+                }
+
+            }
+
+            DrawCass(points[0][0], thresholds[0][0]);
         }
 
-        private void DrawCass(Welcome wl)
+        private void DrawCass(PointPairList pointsAscan, PointPairList pointsThreshold)
         {
             zedGraphControl1.GraphPane.CurveList.Clear();
-
-            PointPairList pointsAscan = new PointPairList();
-            PointPairList pointsThreshold = new PointPairList();
-
-
+          
             {
                 LineItem myCurve = zedGraphControl1.GraphPane.AddCurve("",
                                                                    pointsAscan,
                                                                    Color.DarkBlue,
                                                                    SymbolType.None);
 
-                myCurve = zedGraphControl1.GraphPane.AddCurve("",
+                 myCurve = zedGraphControl1.GraphPane.AddCurve("",
                                                                    pointsThreshold,
-                                                                   Color.Blue,
+                                                                   Color.LightBlue,
                                                                    SymbolType.None);
             }
-
-           // for (int i = 0; )
 
             zedGraphControl1.GraphPane.AxisChange();
             zedGraphControl1.Invalidate();
