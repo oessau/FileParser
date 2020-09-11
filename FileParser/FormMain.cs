@@ -15,6 +15,8 @@ namespace FileParser
 {
     public partial class FormMain : Form
     {
+        bool enabler = false;
+        Welcome wl;
         PointPairList[][] points;
         PointPairList[][] thresholds;
 
@@ -162,6 +164,9 @@ namespace FileParser
 
         private void removeAllToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            toolStripProbes.Visible = false;
+            
+            wl = null;
 
             if (zedGraphControl1.GraphPane.CurveList.Count == 0)
                 return;
@@ -280,15 +285,20 @@ namespace FileParser
             string fileName = openFileDialog.FileName;
             string fileText = System.IO.File.ReadAllText(fileName);
 
-            Welcome wl = Welcome.FromJson(fileText);
+            wl = Welcome.FromJson(fileText);
 
             points = new PointPairList[wl.AssessmentMeasurements.Count][];
             thresholds = new PointPairList[wl.AssessmentMeasurements.Count][];
+
+            toolStripProbes.Visible = true;
+            toolStripComboBoxGroup.Items.Clear();
+            toolStripComboBoxProbe.Items.Clear();
 
             for (int i = 0; i < wl.AssessmentMeasurements.Count; i++)
             {
                 points[i] = new PointPairList[wl.AssessmentMeasurements[i].SensorMeasurements.Count];
                 thresholds[i] = new PointPairList[wl.AssessmentMeasurements[i].SensorMeasurements.Count];
+                toolStripComboBoxGroup.Items.Add(i);
                 for (int j = 0; j < wl.AssessmentMeasurements[i].SensorMeasurements.Count; j++)
                 {
                     
@@ -302,10 +312,10 @@ namespace FileParser
                         byte[] dataTof = Convert.FromBase64String(tof);
                         //ushort sample;
 
-                        for (int n = 0; n < dataAmp.Length/2; n++)
+                        for (int n = 0; n < dataAmp.Length; n++)
                         {
-                            double Y = (double)BitConverter.ToUInt16(dataAmp, n * 2) % 128;
-                            double X = (double)BitConverter.ToUInt32(dataTof, n * 4) / 1000000;
+                            double Y = (double)dataAmp[n] % 128;
+                            double X = ((double)dataTof[2 * n] * 256 + (double)dataTof[2 * n + 1]) * 20 / 1000;
 
                             points[i][j].Add(new PointPair(X, 0));
                             points[i][j].Add(new PointPair(X, Y));
@@ -330,7 +340,16 @@ namespace FileParser
 
             }
 
+            enabler = false;
+            for (int j = 0; j < wl.AssessmentMeasurements[0].SensorMeasurements.Count; j++)
+            {
+                toolStripComboBoxProbe.Items.Add(wl.AssessmentMeasurements[0].SensorMeasurements[j].SerialNumber);
+            }
+            toolStripComboBoxGroup.SelectedIndex = 0;
+            toolStripComboBoxProbe.SelectedIndex = 0;
+
             DrawCass(points[0][0], thresholds[0][0]);
+            enabler = true;
         }
 
         private void DrawCass(PointPairList pointsAscan, PointPairList pointsThreshold)
@@ -345,12 +364,38 @@ namespace FileParser
 
                  myCurve = zedGraphControl1.GraphPane.AddCurve("",
                                                                    pointsThreshold,
-                                                                   Color.LightBlue,
+                                                                   Color.Red,
                                                                    SymbolType.None);
             }
 
             zedGraphControl1.GraphPane.AxisChange();
             zedGraphControl1.Invalidate();
+        }
+
+        private void toolStripComboBoxProbe_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int i = toolStripComboBoxGroup.SelectedIndex;
+            int j = toolStripComboBoxProbe.SelectedIndex;
+            
+            DrawCass(points[i][j], thresholds[i][j]);
+        }
+
+        private void toolStripComboBoxGroup_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            enabler = false;
+
+            int i = toolStripComboBoxGroup.SelectedIndex;
+            toolStripComboBoxProbe.Items.Clear();
+
+            for (int j = 0; j < wl.AssessmentMeasurements[i].SensorMeasurements.Count; j++)
+            {
+                toolStripComboBoxProbe.Items.Add(wl.AssessmentMeasurements[i].SensorMeasurements[j].SerialNumber);
+            }
+
+            toolStripComboBoxProbe.SelectedIndex = 0;
+
+            DrawCass(points[i][0], thresholds[i][0]);
+            enabler = true;
         }
     }
 }

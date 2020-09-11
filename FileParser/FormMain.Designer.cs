@@ -35,9 +35,15 @@
             this.cassToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
-            this.statusStrip1 = new System.Windows.Forms.StatusStrip();
+            this.statusStripMain = new System.Windows.Forms.StatusStrip();
+            this.toolStripErrorLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripProbes = new System.Windows.Forms.ToolStrip();
+            this.toolStripComboBoxProbe = new System.Windows.Forms.ToolStripComboBox();
+            this.toolStripComboBoxGroup = new System.Windows.Forms.ToolStripComboBox();
             this.zedGraphControl1 = new ZedGraph.ZedGraphControl();
             this.menuStrip.SuspendLayout();
+            this.statusStripMain.SuspendLayout();
+            this.toolStripProbes.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip
@@ -85,18 +91,54 @@
             // 
             this.openFileDialog.FileName = "openFileDialog";
             // 
-            // statusStrip1
+            // statusStripMain
             // 
-            this.statusStrip1.Location = new System.Drawing.Point(0, 428);
-            this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(501, 22);
-            this.statusStrip1.TabIndex = 1;
-            this.statusStrip1.Text = "statusStrip1";
+            this.statusStripMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripErrorLabel});
+            this.statusStripMain.Location = new System.Drawing.Point(0, 428);
+            this.statusStripMain.Name = "statusStripMain";
+            this.statusStripMain.Size = new System.Drawing.Size(501, 22);
+            this.statusStripMain.TabIndex = 1;
+            this.statusStripMain.Text = "statusStrip1";
+            // 
+            // toolStripErrorLabel
+            // 
+            this.toolStripErrorLabel.Name = "toolStripErrorLabel";
+            this.toolStripErrorLabel.Size = new System.Drawing.Size(486, 17);
+            this.toolStripErrorLabel.Spring = true;
+            // 
+            // toolStripProbes
+            // 
+            this.toolStripProbes.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripComboBoxProbe,
+            this.toolStripComboBoxGroup});
+            this.toolStripProbes.Location = new System.Drawing.Point(0, 24);
+            this.toolStripProbes.Name = "toolStripProbes";
+            this.toolStripProbes.Size = new System.Drawing.Size(501, 25);
+            this.toolStripProbes.TabIndex = 3;
+            this.toolStripProbes.Text = "toolStrip1";
+            this.toolStripProbes.Visible = false;
+            // 
+            // toolStripComboBoxProbe
+            // 
+            this.toolStripComboBoxProbe.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripComboBoxProbe.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.toolStripComboBoxProbe.Name = "toolStripComboBoxProbe";
+            this.toolStripComboBoxProbe.Size = new System.Drawing.Size(121, 25);
+            this.toolStripComboBoxProbe.SelectedIndexChanged += new System.EventHandler(this.toolStripComboBoxProbe_SelectedIndexChanged);
+            // 
+            // toolStripComboBoxGroup
+            // 
+            this.toolStripComboBoxGroup.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripComboBoxGroup.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.toolStripComboBoxGroup.Name = "toolStripComboBoxGroup";
+            this.toolStripComboBoxGroup.Size = new System.Drawing.Size(121, 25);
+            this.toolStripComboBoxGroup.SelectedIndexChanged += new System.EventHandler(this.toolStripComboBoxGroup_SelectedIndexChanged);
             // 
             // zedGraphControl1
             // 
             this.zedGraphControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.zedGraphControl1.Location = new System.Drawing.Point(0, 24);
+            this.zedGraphControl1.Location = new System.Drawing.Point(0, 49);
             this.zedGraphControl1.Name = "zedGraphControl1";
             this.zedGraphControl1.ScrollGrace = 0D;
             this.zedGraphControl1.ScrollMaxX = 0D;
@@ -105,8 +147,8 @@
             this.zedGraphControl1.ScrollMinX = 0D;
             this.zedGraphControl1.ScrollMinY = 0D;
             this.zedGraphControl1.ScrollMinY2 = 0D;
-            this.zedGraphControl1.Size = new System.Drawing.Size(501, 404);
-            this.zedGraphControl1.TabIndex = 2;
+            this.zedGraphControl1.Size = new System.Drawing.Size(501, 379);
+            this.zedGraphControl1.TabIndex = 4;
             this.zedGraphControl1.UseExtendedPrintDialog = true;
             // 
             // FormMain
@@ -115,7 +157,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(501, 450);
             this.Controls.Add(this.zedGraphControl1);
-            this.Controls.Add(this.statusStrip1);
+            this.Controls.Add(this.toolStripProbes);
+            this.Controls.Add(this.statusStripMain);
             this.Controls.Add(this.menuStrip);
             this.MainMenuStrip = this.menuStrip;
             this.Name = "FormMain";
@@ -123,6 +166,10 @@
             this.Load += new System.EventHandler(this.FormMain_Load);
             this.menuStrip.ResumeLayout(false);
             this.menuStrip.PerformLayout();
+            this.statusStripMain.ResumeLayout(false);
+            this.statusStripMain.PerformLayout();
+            this.toolStripProbes.ResumeLayout(false);
+            this.toolStripProbes.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -133,11 +180,15 @@
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.OpenFileDialog openFileDialog;
         private System.Windows.Forms.ToolStripMenuItem graphToolStripMenuItem;
-        private System.Windows.Forms.StatusStrip statusStrip1;
-        private ZedGraph.ZedGraphControl zedGraphControl1;
+        private System.Windows.Forms.StatusStrip statusStripMain;
         private System.Windows.Forms.ToolStripMenuItem removeAllToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem matLabToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem cassToolStripMenuItem;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripErrorLabel;
+        private System.Windows.Forms.ToolStrip toolStripProbes;
+        private System.Windows.Forms.ToolStripComboBox toolStripComboBoxProbe;
+        private System.Windows.Forms.ToolStripComboBox toolStripComboBoxGroup;
+        private ZedGraph.ZedGraphControl zedGraphControl1;
     }
 }
 
