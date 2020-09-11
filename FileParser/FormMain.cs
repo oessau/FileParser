@@ -19,6 +19,7 @@ namespace FileParser
         Welcome wl;
         PointPairList[][] points;
         PointPairList[][] thresholds;
+        PointPairList[][] nce;
 
         private List<Color> color = new List<Color>();
         public FormMain()
@@ -289,6 +290,7 @@ namespace FileParser
 
             points = new PointPairList[wl.AssessmentMeasurements.Count][];
             thresholds = new PointPairList[wl.AssessmentMeasurements.Count][];
+            nce = new PointPairList[wl.AssessmentMeasurements.Count][];
 
             toolStripProbes.Visible = true;
             toolStripComboBoxGroup.Items.Clear();
@@ -298,33 +300,45 @@ namespace FileParser
             {
                 points[i] = new PointPairList[wl.AssessmentMeasurements[i].SensorMeasurements.Count];
                 thresholds[i] = new PointPairList[wl.AssessmentMeasurements[i].SensorMeasurements.Count];
+                nce[i] = new PointPairList[wl.AssessmentMeasurements[i].SensorMeasurements.Count];
                 toolStripComboBoxGroup.Items.Add(i);
                 for (int j = 0; j < wl.AssessmentMeasurements[i].SensorMeasurements.Count; j++)
                 {
                     
                     points[i][j] = new PointPairList();
-
+                    nce[i][j] = new PointPairList();
                     
-                        string amp = wl.AssessmentMeasurements[i].SensorMeasurements[j].CalibrationShot.ShotData.Amplitudes;
-                        string tof = wl.AssessmentMeasurements[i].SensorMeasurements[j].CalibrationShot.ShotData.TimeOfFlights;
+
+                    string amp = wl.AssessmentMeasurements[i].SensorMeasurements[j].CalibrationShot.ShotData.Amplitudes;
+                    string tof = wl.AssessmentMeasurements[i].SensorMeasurements[j].CalibrationShot.ShotData.TimeOfFlights;
                         
-                        byte[] dataAmp = Convert.FromBase64String(amp);
-                        byte[] dataTof = Convert.FromBase64String(tof);
-                        //ushort sample;
+                    byte[] dataAmp = Convert.FromBase64String(amp);
+                    byte[] dataTof = Convert.FromBase64String(tof);
 
-                        for (int n = 0; n < dataAmp.Length; n++)
+                    PointPair maxPoint = new PointPair(0,0);                    
+
+                    for (int n = 0; n < dataAmp.Length; n++)
+                    {
+                        double Y = (double)dataAmp[n] % 128;
+                        double X = ((double)dataTof[2 * n] * 256 + (double)dataTof[2 * n + 1]) * 20 / 1000;
+
+                        points[i][j].Add(new PointPair(X, 0));
+                        points[i][j].Add(new PointPair(X, Y));
+                        points[i][j].Add(new PointPair(X, 0));
+
+                        if (Y >= maxPoint.Y)
                         {
-                            double Y = (double)dataAmp[n] % 128;
-                            double X = ((double)dataTof[2 * n] * 256 + (double)dataTof[2 * n + 1]) * 20 / 1000;
-
-                            points[i][j].Add(new PointPair(X, 0));
-                            points[i][j].Add(new PointPair(X, Y));
-                            points[i][j].Add(new PointPair(X, 0));
+                            maxPoint.Y = Y;
+                            maxPoint.X = X;
                         }
-                    
+                    }
 
+                    maxPoint.Y = wl.AssessmentMeasurements[i].SensorMeasurements[j].CalibrationAmplitude;
+
+                    InitRejection(nce[i][j], maxPoint);
 
                     thresholds[i][j] = new PointPairList();
+
                     int last = wl.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges.Count - 1;
                     for (int k = 0; k < last; k++)
                     {
@@ -348,25 +362,51 @@ namespace FileParser
             toolStripComboBoxGroup.SelectedIndex = 0;
             toolStripComboBoxProbe.SelectedIndex = 0;
 
-            DrawCass(points[0][0], thresholds[0][0]);
+            DrawCass(points[0][0], thresholds[0][0], nce[0][0]);
             enabler = true;
         }
 
-        private void DrawCass(PointPairList pointsAscan, PointPairList pointsThreshold)
+        private void InitRejection(PointPairList list, PointPair zeroPoint)
+        {
+            list.Clear();
+
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 0.0, zeroPoint.Y + 20.0));
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 0.7, zeroPoint.Y + 20.0));
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 0.7, zeroPoint.Y + 5.0));
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 1.1, zeroPoint.Y + 5.0));
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 1.1, zeroPoint.Y + -10.0));
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 1.3, zeroPoint.Y + -10.0));
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 1.3, zeroPoint.Y + -15.0));
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 1.5, zeroPoint.Y + -15.0));
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 1.5, zeroPoint.Y + -22.0));
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 1.8, zeroPoint.Y + -22.0));
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 1.8, zeroPoint.Y + -26.0));
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 2.0, zeroPoint.Y + -26.0));
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 2.0, zeroPoint.Y + -30.0));
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 2.5, zeroPoint.Y + -30.0));
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 2.5, zeroPoint.Y + -30.0));
+            list.Add(new PointPair(zeroPoint.X - 0.35 + 3.0, zeroPoint.Y + -30.0));
+        }
+
+
+        private void DrawCass(PointPairList pointsAscan, PointPairList pointsThreshold, PointPairList pointsNCE = null)
         {
             zedGraphControl1.GraphPane.CurveList.Clear();
           
-            {
-                LineItem myCurve = zedGraphControl1.GraphPane.AddCurve("",
+            LineItem myCurve = zedGraphControl1.GraphPane.AddCurve("",
                                                                    pointsAscan,
                                                                    Color.DarkBlue,
                                                                    SymbolType.None);
 
-                 myCurve = zedGraphControl1.GraphPane.AddCurve("",
+            myCurve = zedGraphControl1.GraphPane.AddCurve("",
                                                                    pointsThreshold,
                                                                    Color.Red,
                                                                    SymbolType.None);
-            }
+            if (pointsNCE != null)
+                myCurve = zedGraphControl1.GraphPane.AddCurve("",
+                                                                   pointsNCE,
+                                                                   Color.Green,
+                                                                   SymbolType.None);
 
             zedGraphControl1.GraphPane.AxisChange();
             zedGraphControl1.Invalidate();
@@ -377,7 +417,7 @@ namespace FileParser
             int i = toolStripComboBoxGroup.SelectedIndex;
             int j = toolStripComboBoxProbe.SelectedIndex;
             
-            DrawCass(points[i][j], thresholds[i][j]);
+            DrawCass(points[i][j], thresholds[i][j], nce[i][j]);
         }
 
         private void toolStripComboBoxGroup_SelectedIndexChanged(object sender, EventArgs e)
@@ -394,7 +434,7 @@ namespace FileParser
 
             toolStripComboBoxProbe.SelectedIndex = 0;
 
-            DrawCass(points[i][0], thresholds[i][0]);
+            DrawCass(points[i][0], thresholds[i][0], nce[i][0]);
             enabler = true;
         }
     }
