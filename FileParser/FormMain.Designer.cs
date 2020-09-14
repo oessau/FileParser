@@ -40,9 +40,10 @@
             this.toolStripProbes = new System.Windows.Forms.ToolStrip();
             this.toolStripComboBoxProbe = new System.Windows.Forms.ToolStripComboBox();
             this.toolStripComboBoxGroup = new System.Windows.Forms.ToolStripComboBox();
-            this.zedGraphControl1 = new ZedGraph.ZedGraphControl();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripTextBoxSearch = new System.Windows.Forms.ToolStripTextBox();
+            this.zedGraphControl1 = new ZedGraph.ZedGraphControl();
+            this.toolStripLabelSearch = new System.Windows.Forms.ToolStripLabel();
             this.menuStrip.SuspendLayout();
             this.statusStripMain.SuspendLayout();
             this.toolStripProbes.SuspendLayout();
@@ -115,7 +116,8 @@
             this.toolStripComboBoxProbe,
             this.toolStripComboBoxGroup,
             this.toolStripSeparator1,
-            this.toolStripTextBoxSearch});
+            this.toolStripTextBoxSearch,
+            this.toolStripLabelSearch});
             this.toolStripProbes.Location = new System.Drawing.Point(0, 24);
             this.toolStripProbes.Name = "toolStripProbes";
             this.toolStripProbes.Size = new System.Drawing.Size(501, 25);
@@ -129,6 +131,7 @@
             this.toolStripComboBoxProbe.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.toolStripComboBoxProbe.Name = "toolStripComboBoxProbe";
             this.toolStripComboBoxProbe.Size = new System.Drawing.Size(121, 25);
+            this.toolStripComboBoxProbe.ToolTipText = "Serial";
             this.toolStripComboBoxProbe.SelectedIndexChanged += new System.EventHandler(this.toolStripComboBoxProbe_SelectedIndexChanged);
             // 
             // toolStripComboBoxGroup
@@ -137,7 +140,25 @@
             this.toolStripComboBoxGroup.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.toolStripComboBoxGroup.Name = "toolStripComboBoxGroup";
             this.toolStripComboBoxGroup.Size = new System.Drawing.Size(121, 25);
+            this.toolStripComboBoxGroup.ToolTipText = "Group";
             this.toolStripComboBoxGroup.SelectedIndexChanged += new System.EventHandler(this.toolStripComboBoxGroup_SelectedIndexChanged);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolStripTextBoxSearch
+            // 
+            this.toolStripTextBoxSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripTextBoxSearch.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.toolStripTextBoxSearch.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.toolStripTextBoxSearch.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.toolStripTextBoxSearch.Name = "toolStripTextBoxSearch";
+            this.toolStripTextBoxSearch.Size = new System.Drawing.Size(100, 25);
+            this.toolStripTextBoxSearch.ToolTipText = "Search by Serial Number";
+            this.toolStripTextBoxSearch.KeyDown += new System.Windows.Forms.KeyEventHandler(this.toolStripTextBoxSearch_KeyDown);
             // 
             // zedGraphControl1
             // 
@@ -155,21 +176,12 @@
             this.zedGraphControl1.TabIndex = 4;
             this.zedGraphControl1.UseExtendedPrintDialog = true;
             // 
-            // toolStripSeparator1
+            // toolStripLabelSearch
             // 
-            this.toolStripSeparator1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
-            // 
-            // toolStripTextBoxSearch
-            // 
-            this.toolStripTextBoxSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripTextBoxSearch.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
-            this.toolStripTextBoxSearch.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
-            this.toolStripTextBoxSearch.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.toolStripTextBoxSearch.Name = "toolStripTextBoxSearch";
-            this.toolStripTextBoxSearch.Size = new System.Drawing.Size(100, 25);
-            this.toolStripTextBoxSearch.KeyDown += new System.Windows.Forms.KeyEventHandler(this.toolStripTextBoxSearch_KeyDown);
+            this.toolStripLabelSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabelSearch.Name = "toolStripLabelSearch";
+            this.toolStripLabelSearch.Size = new System.Drawing.Size(45, 22);
+            this.toolStripLabelSearch.Text = "Search:";
             // 
             // FormMain
             // 
@@ -211,6 +223,7 @@
         private ZedGraph.ZedGraphControl zedGraphControl1;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripTextBox toolStripTextBoxSearch;
+        private System.Windows.Forms.ToolStripLabel toolStripLabelSearch;
     }
 }
 

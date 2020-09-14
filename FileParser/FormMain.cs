@@ -454,7 +454,22 @@ namespace FileParser
         {
             if (e.KeyData == Keys.Enter)
             {
-                string selected = this.toolStripTextBoxSearch.Text;                
+                string selected = this.toolStripTextBoxSearch.Text;
+
+                for (int k = 0; k < wl.AssessmentMeasurements.Count; k++)
+                {
+                    for (int l = 0; l < wl.AssessmentMeasurements[k].SensorMeasurements.Count; l++)
+                    {
+                        if (selected == wl.AssessmentMeasurements[k].SensorMeasurements[l].SerialNumber)
+                        {
+                            toolStripComboBoxGroup.SelectedIndex = k;
+                            toolStripComboBoxProbe.SelectedIndex = l;
+
+                            DrawCass(points[k][l], thresholds[k][l], nce[k][l]);
+                            break;
+                        }
+                    }
+                }
             }
         }
     }
