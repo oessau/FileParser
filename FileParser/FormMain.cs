@@ -21,6 +21,8 @@ namespace FileParser
         PointPairList[][] thresholds;
         PointPairList[][] nce;
 
+        AutoCompleteStringCollection autocompleteProbeSerial = new AutoCompleteStringCollection();
+
         private List<Color> color = new List<Color>();
         public FormMain()
         {
@@ -364,6 +366,16 @@ namespace FileParser
 
             DrawCass(points[0][0], thresholds[0][0], nce[0][0]);
             enabler = true;
+
+            for (int k = 0; k < wl.AssessmentMeasurements.Count; k++)
+            {
+                for (int l = 0; l < wl.AssessmentMeasurements[k].SensorMeasurements.Count; l++)
+                {
+                    autocompleteProbeSerial.Add(wl.AssessmentMeasurements[k].SensorMeasurements[l].SerialNumber);
+                }
+            }
+
+            toolStripTextBoxSearch.AutoCompleteCustomSource = autocompleteProbeSerial;
         }
 
         private void InitRejection(PointPairList list, PointPair zeroPoint)
@@ -436,6 +448,14 @@ namespace FileParser
 
             DrawCass(points[i][0], thresholds[i][0], nce[i][0]);
             enabler = true;
+        }
+
+        private void toolStripTextBoxSearch_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.Enter)
+            {
+                string selected = this.toolStripTextBoxSearch.Text;                
+            }
         }
     }
 }

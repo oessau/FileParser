@@ -41,6 +41,8 @@
             this.toolStripComboBoxProbe = new System.Windows.Forms.ToolStripComboBox();
             this.toolStripComboBoxGroup = new System.Windows.Forms.ToolStripComboBox();
             this.zedGraphControl1 = new ZedGraph.ZedGraphControl();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripTextBoxSearch = new System.Windows.Forms.ToolStripTextBox();
             this.menuStrip.SuspendLayout();
             this.statusStripMain.SuspendLayout();
             this.toolStripProbes.SuspendLayout();
@@ -69,14 +71,14 @@
             // matLabToolStripMenuItem
             // 
             this.matLabToolStripMenuItem.Name = "matLabToolStripMenuItem";
-            this.matLabToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.matLabToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
             this.matLabToolStripMenuItem.Text = "MatLab *.txt";
             this.matLabToolStripMenuItem.Click += new System.EventHandler(this.matLabToolStripMenuItem_Click);
             // 
             // cassToolStripMenuItem
             // 
             this.cassToolStripMenuItem.Name = "cassToolStripMenuItem";
-            this.cassToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.cassToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
             this.cassToolStripMenuItem.Text = "Cassiopeia *.cass";
             this.cassToolStripMenuItem.Click += new System.EventHandler(this.cassToolStripMenuItem_Click);
             // 
@@ -111,7 +113,9 @@
             // 
             this.toolStripProbes.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripComboBoxProbe,
-            this.toolStripComboBoxGroup});
+            this.toolStripComboBoxGroup,
+            this.toolStripSeparator1,
+            this.toolStripTextBoxSearch});
             this.toolStripProbes.Location = new System.Drawing.Point(0, 24);
             this.toolStripProbes.Name = "toolStripProbes";
             this.toolStripProbes.Size = new System.Drawing.Size(501, 25);
@@ -151,6 +155,22 @@
             this.zedGraphControl1.TabIndex = 4;
             this.zedGraphControl1.UseExtendedPrintDialog = true;
             // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // toolStripTextBoxSearch
+            // 
+            this.toolStripTextBoxSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripTextBoxSearch.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.toolStripTextBoxSearch.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.toolStripTextBoxSearch.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.toolStripTextBoxSearch.Name = "toolStripTextBoxSearch";
+            this.toolStripTextBoxSearch.Size = new System.Drawing.Size(100, 25);
+            this.toolStripTextBoxSearch.KeyDown += new System.Windows.Forms.KeyEventHandler(this.toolStripTextBoxSearch_KeyDown);
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -189,6 +209,8 @@
         private System.Windows.Forms.ToolStripComboBox toolStripComboBoxProbe;
         private System.Windows.Forms.ToolStripComboBox toolStripComboBoxGroup;
         private ZedGraph.ZedGraphControl zedGraphControl1;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripTextBox toolStripTextBoxSearch;
     }
 }
 
