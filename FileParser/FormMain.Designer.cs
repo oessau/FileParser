@@ -71,6 +71,7 @@
             this.matLabToolStripMenuItem.Name = "matLabToolStripMenuItem";
             this.matLabToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.matLabToolStripMenuItem.Text = "MatLab *.txt";
+            this.matLabToolStripMenuItem.Visible = false;
             this.matLabToolStripMenuItem.Click += new System.EventHandler(this.matLabToolStripMenuItem_Click);
             // 
             // cassToolStripMenuItem
@@ -138,7 +139,7 @@
             // zedGraphControl1
             // 
             this.zedGraphControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.zedGraphControl1.Location = new System.Drawing.Point(0, 49);
+            this.zedGraphControl1.Location = new System.Drawing.Point(0, 24);
             this.zedGraphControl1.Name = "zedGraphControl1";
             this.zedGraphControl1.ScrollGrace = 0D;
             this.zedGraphControl1.ScrollMaxX = 0D;
@@ -147,7 +148,7 @@
             this.zedGraphControl1.ScrollMinX = 0D;
             this.zedGraphControl1.ScrollMinY = 0D;
             this.zedGraphControl1.ScrollMinY2 = 0D;
-            this.zedGraphControl1.Size = new System.Drawing.Size(501, 379);
+            this.zedGraphControl1.Size = new System.Drawing.Size(501, 404);
             this.zedGraphControl1.TabIndex = 4;
             this.zedGraphControl1.UseExtendedPrintDialog = true;
             // 
