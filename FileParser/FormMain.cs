@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using ZedGraph;
 
 namespace FileParser
@@ -16,9 +18,10 @@ namespace FileParser
     public partial class FormMain : Form
     {
         bool enabler = false;
-        Cassiopeia wl;
-        //Welcome wl;
-        PointPairList[][] points;
+        CassData cassData;
+        
+        PointPairList[] onePoints;
+        PointPairList[][] twoPoints;
         PointPairList[][] thresholds;
         PointPairList[][] nce;
 
@@ -170,7 +173,7 @@ namespace FileParser
         {
             toolStripProbes.Visible = false;
             
-            wl = null;
+            cassData = null;
 
             if (zedGraphControl1.GraphPane.CurveList.Count == 0)
                 return;
@@ -289,94 +292,142 @@ namespace FileParser
             string fileName = openFileDialog.FileName;
             string fileText = System.IO.File.ReadAllText(fileName);
 
-            wl = Cassiopeia.FromJson(fileText);
+            //cassData = JsonConvert.DeserializeObject<CassData>(fileText);
 
-            points = new PointPairList[wl.AssessmentMeasurements.Length][];
-            thresholds = new PointPairList[wl.AssessmentMeasurements.Length][];
-            nce = new PointPairList[wl.AssessmentMeasurements.Length][];
+            cassData = CassData.FromJson(fileText);
 
-            toolStripProbes.Visible = true;
-            toolStripComboBoxGroup.Items.Clear();
-            toolStripComboBoxProbe.Items.Clear();
-
-            for (int i = 0; i < wl.AssessmentMeasurements.Length; i++)
+            if (cassData.AssessmentMeasurements != null)
             {
-                points[i] = new PointPairList[wl.AssessmentMeasurements[i].SensorMeasurements.Length];
-                thresholds[i] = new PointPairList[wl.AssessmentMeasurements[i].SensorMeasurements.Length];
-                nce[i] = new PointPairList[wl.AssessmentMeasurements[i].SensorMeasurements.Length];
-                toolStripComboBoxGroup.Items.Add(i);
-                for (int j = 0; j < wl.AssessmentMeasurements[i].SensorMeasurements.Length; j++)
+                twoPoints = new PointPairList[cassData.AssessmentMeasurements.Count][];
+                thresholds = new PointPairList[cassData.AssessmentMeasurements.Count][];
+                nce = new PointPairList[cassData.AssessmentMeasurements.Count][];
+
+                toolStripProbes.Visible = true;
+                toolStripComboBoxGroup.Items.Clear();
+                toolStripComboBoxProbe.Items.Clear();
+
+                for (int i = 0; i < cassData.AssessmentMeasurements.Count; i++)
                 {
-                    
-                    points[i][j] = new PointPairList();
-                    nce[i][j] = new PointPairList();
-                    
-
-                    string amp = wl.AssessmentMeasurements[i].SensorMeasurements[j].CalibrationShot.ShotData.Amplitudes;
-                    string tof = wl.AssessmentMeasurements[i].SensorMeasurements[j].CalibrationShot.ShotData.TimeOfFlights;
-                        
-                    byte[] dataAmp = Convert.FromBase64String(amp);
-                    byte[] dataTof = Convert.FromBase64String(tof);
-
-                    PointPair maxPoint = new PointPair(0,0);                    
-
-                    for (int n = 0; n < dataAmp.Length; n++)
+                    twoPoints[i] = new PointPairList[cassData.AssessmentMeasurements[i].SensorMeasurements.Count];
+                    thresholds[i] = new PointPairList[cassData.AssessmentMeasurements[i].SensorMeasurements.Count];
+                    nce[i] = new PointPairList[cassData.AssessmentMeasurements[i].SensorMeasurements.Count];
+                    toolStripComboBoxGroup.Items.Add(i);
+                    for (int j = 0; j < cassData.AssessmentMeasurements[i].SensorMeasurements.Count; j++)
                     {
-                        double Y = (double)dataAmp[n] % 128;
-                        double X = ((double)dataTof[2 * n] * 256 + (double)dataTof[2 * n + 1]) * 20 / 1000;
 
-                        points[i][j].Add(new PointPair(X, 0));
-                        points[i][j].Add(new PointPair(X, Y));
-                        points[i][j].Add(new PointPair(X, 0));
+                        twoPoints[i][j] = new PointPairList();
+                        nce[i][j] = new PointPairList();
 
-                        if (Y >= maxPoint.Y)
+                        string amp = cassData.AssessmentMeasurements[i].SensorMeasurements[j].CalibrationShot.ShotData.Amplitudes;
+                        string tof = cassData.AssessmentMeasurements[i].SensorMeasurements[j].CalibrationShot.ShotData.TimeOfFlights;
+
+                        byte[] dataAmp = Convert.FromBase64String(amp);
+                        byte[] dataTof = Convert.FromBase64String(tof);
+
+                        PointPair maxPoint = new PointPair(0, 0);
+
+                        for (int n = 0; n < dataAmp.Length; n++)
                         {
-                            maxPoint.Y = Y;
-                            maxPoint.X = X;
+                            double Y = (double)dataAmp[n] % 128;
+                            double X = ((double)dataTof[2 * n] * 256 + (double)dataTof[2 * n + 1]) * 20 / 1000;
+
+                            twoPoints[i][j].Add(new PointPair(X, 0));
+                            twoPoints[i][j].Add(new PointPair(X, Y));
+                            twoPoints[i][j].Add(new PointPair(X, 0));
+
+                            if (Y > maxPoint.Y)
+                            {
+                                maxPoint.Y = Y;
+                                maxPoint.X = X;
+                            }
+                        }
+
+                        maxPoint.Y = cassData.AssessmentMeasurements[i].SensorMeasurements[j].CalibrationAmplitude;
+
+                        InitRejection(nce[i][j], maxPoint);
+
+                        thresholds[i][j] = new PointPairList();
+
+                        int last = cassData.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges.Count - 1;
+                        for (int k = 0; k < last; k++)
+                        {
+                            thresholds[i][j].Add(new PointPair((double)cassData.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[k].TimeOfFlightInNanoseconds / 1000,
+                                                              (double)cassData.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[k].ThresholdInDecibel));
+                            thresholds[i][j].Add(new PointPair((double)cassData.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[k + 1].TimeOfFlightInNanoseconds / 1000,
+                                                              (double)cassData.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[k].ThresholdInDecibel));
+                        }
+
+                        thresholds[i][j].Add(new PointPair((double)cassData.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[last].TimeOfFlightInNanoseconds / 1000,
+                                                             (double)cassData.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[last].ThresholdInDecibel));
+                    }
+
+                }
+
+                enabler = false;
+                for (int j = 0; j < cassData.AssessmentMeasurements[0].SensorMeasurements.Count; j++)
+                {
+                    toolStripComboBoxProbe.Items.Add(cassData.AssessmentMeasurements[0].SensorMeasurements[j].SerialNumber);
+                }
+                toolStripComboBoxGroup.SelectedIndex = 0;
+                toolStripComboBoxProbe.SelectedIndex = 0;
+
+                DrawCass(null, twoPoints[0][0], thresholds[0][0], nce[0][0]);
+                enabler = true;
+
+                for (int k = 0; k < cassData.AssessmentMeasurements.Count; k++)
+                {
+                    for (int l = 0; l < cassData.AssessmentMeasurements[k].SensorMeasurements.Count; l++)
+                    {
+                        autocompleteProbeSerial.Add(cassData.AssessmentMeasurements[k].SensorMeasurements[l].SerialNumber);
+                    }
+                }
+
+                toolStripTextBoxSearch.AutoCompleteCustomSource = autocompleteProbeSerial;
+            }
+
+            else
+            {
+                onePoints = new PointPairList[cassData.Measurements.Count];
+
+                toolStripProbes.Visible = true;
+                toolStripComboBoxGroup.Items.Clear();
+                toolStripComboBoxProbe.Items.Clear();
+
+                for (int i = 0; i < cassData.Measurements.Count; i++)
+                {
+                    {
+                        onePoints[i] = new PointPairList();
+
+                        string amp = cassData.Measurements[i].Shot.ShotData.Amplitudes;
+                        string tof = cassData.Measurements[i].Shot.ShotData.TimeOfFlights;
+
+                        byte[] dataAmp = Convert.FromBase64String(amp);
+                        byte[] dataTof = Convert.FromBase64String(tof);
+
+                        PointPair maxPoint = new PointPair(0, 0);
+
+                        for (int n = 0; n < dataAmp.Length; n++)
+                        {
+                            double Y = (double)dataAmp[n] % 128;
+                            double X = ((double)dataTof[2 * n] * 256 + (double)dataTof[2 * n + 1]) * 20 / 1000;
+
+                            onePoints[i].Add(new PointPair(X, 0));
+                            onePoints[i].Add(new PointPair(X, Y));
+                            onePoints[i].Add(new PointPair(X, 0));
                         }
                     }
-
-                    maxPoint.Y = wl.AssessmentMeasurements[i].SensorMeasurements[j].CalibrationAmplitude;
-
-                    InitRejection(nce[i][j], maxPoint);
-
-                    thresholds[i][j] = new PointPairList();
-
-                    int last = wl.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges.Length - 1;
-                    for (int k = 0; k < last; k++)
-                    {
-                        thresholds[i][j].Add(new PointPair((double)wl.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[k].TimeOfFlightInNanoseconds / 1000,
-                                                          (double)wl.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[k].ThresholdInDecibel));
-                        thresholds[i][j].Add(new PointPair((double)wl.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[k + 1].TimeOfFlightInNanoseconds / 1000,
-                                                          (double)wl.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[k].ThresholdInDecibel));
-                    }
-
-                    thresholds[i][j].Add(new PointPair((double)wl.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[last].TimeOfFlightInNanoseconds / 1000,
-                                                         (double)wl.AssessmentMeasurements[i].SensorMeasurements[j].ExpectationRanges[last].ThresholdInDecibel));
                 }
 
+                enabler = false;
+                int counter;
+
+                for (counter = 0; counter < onePoints.Length; counter++)
+                    if (onePoints[counter].Count > 0)
+                        break;
+
+                DrawCass(fileName, onePoints[counter], null, null);// thresholds[0][0], nce[0][0]);
+                enabler = true;
             }
-
-            enabler = false;
-            for (int j = 0; j < wl.AssessmentMeasurements[0].SensorMeasurements.Length; j++)
-            {
-                toolStripComboBoxProbe.Items.Add(wl.AssessmentMeasurements[0].SensorMeasurements[j].SerialNumber);
-            }
-            toolStripComboBoxGroup.SelectedIndex = 0;
-            toolStripComboBoxProbe.SelectedIndex = 0;
-
-            DrawCass(points[0][0], thresholds[0][0], nce[0][0]);
-            enabler = true;
-
-            for (int k = 0; k < wl.AssessmentMeasurements.Length; k++)
-            {
-                for (int l = 0; l < wl.AssessmentMeasurements[k].SensorMeasurements.Length; l++)
-                {
-                    autocompleteProbeSerial.Add(wl.AssessmentMeasurements[k].SensorMeasurements[l].SerialNumber);
-                }
-            }
-
-            toolStripTextBoxSearch.AutoCompleteCustomSource = autocompleteProbeSerial;
         }
 
         //private void cassToolStripMenuItem_Click(object sender, EventArgs e)
@@ -504,7 +555,7 @@ namespace FileParser
         }
 
 
-        private void DrawCass(PointPairList pointsAscan, PointPairList pointsThreshold, PointPairList pointsNCE = null)
+        private void DrawCass(string fileName, PointPairList pointsAscan, PointPairList pointsThreshold, PointPairList pointsNCE = null)
         {
             zedGraphControl1.GraphPane.CurveList.Clear();
           
@@ -523,6 +574,11 @@ namespace FileParser
                                                                    Color.Green,
                                                                    SymbolType.None);
 
+            if (fileName != null)
+                zedGraphControl1.GraphPane.Title.Text = fileName;
+            else
+                zedGraphControl1.GraphPane.Title.Text = string.Empty;
+
             zedGraphControl1.GraphPane.AxisChange();
             zedGraphControl1.Invalidate();
         }
@@ -532,7 +588,7 @@ namespace FileParser
             int i = toolStripComboBoxGroup.SelectedIndex;
             int j = toolStripComboBoxProbe.SelectedIndex;
             
-            DrawCass(points[i][j], thresholds[i][j], nce[i][j]);
+            DrawCass(null, twoPoints[i][j], thresholds[i][j], nce[i][j]);
         }
 
         private void toolStripComboBoxGroup_SelectedIndexChanged(object sender, EventArgs e)
@@ -542,14 +598,14 @@ namespace FileParser
             int i = toolStripComboBoxGroup.SelectedIndex;
             toolStripComboBoxProbe.Items.Clear();
 
-            for (int j = 0; j < wl.AssessmentMeasurements[i].SensorMeasurements.Length; j++)
+            for (int j = 0; j < cassData.AssessmentMeasurements[i].SensorMeasurements.Count; j++)
             {
-                toolStripComboBoxProbe.Items.Add(wl.AssessmentMeasurements[i].SensorMeasurements[j].SerialNumber);
+                toolStripComboBoxProbe.Items.Add(cassData.AssessmentMeasurements[i].SensorMeasurements[j].SerialNumber);
             }
 
             toolStripComboBoxProbe.SelectedIndex = 0;
 
-            DrawCass(points[i][0], thresholds[i][0], nce[i][0]);
+            DrawCass(null, twoPoints[i][0], thresholds[i][0], nce[i][0]);
             enabler = true;
         }
 
@@ -559,16 +615,16 @@ namespace FileParser
             {
                 string selected = this.toolStripTextBoxSearch.Text;
 
-                for (int k = 0; k < wl.AssessmentMeasurements.Length; k++)
+                for (int k = 0; k < cassData.AssessmentMeasurements.Count; k++)
                 {
-                    for (int l = 0; l < wl.AssessmentMeasurements[k].SensorMeasurements.Length; l++)
+                    for (int l = 0; l < cassData.AssessmentMeasurements[k].SensorMeasurements.Count; l++)
                     {
-                        if (selected == wl.AssessmentMeasurements[k].SensorMeasurements[l].SerialNumber)
+                        if (selected == cassData.AssessmentMeasurements[k].SensorMeasurements[l].SerialNumber)
                         {
                             toolStripComboBoxGroup.SelectedIndex = k;
                             toolStripComboBoxProbe.SelectedIndex = l;
 
-                            DrawCass(points[k][l], thresholds[k][l], nce[k][l]);
+                            DrawCass(null, twoPoints[k][l], thresholds[k][l], nce[k][l]);
                             break;
                         }
                     }

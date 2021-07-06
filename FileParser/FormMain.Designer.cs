@@ -42,8 +42,8 @@
             this.toolStripComboBoxGroup = new System.Windows.Forms.ToolStripComboBox();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripTextBoxSearch = new System.Windows.Forms.ToolStripTextBox();
-            this.zedGraphControl1 = new ZedGraph.ZedGraphControl();
             this.toolStripLabelSearch = new System.Windows.Forms.ToolStripLabel();
+            this.zedGraphControl1 = new ZedGraph.ZedGraphControl();
             this.menuStrip.SuspendLayout();
             this.statusStripMain.SuspendLayout();
             this.toolStripProbes.SuspendLayout();
@@ -161,6 +161,13 @@
             this.toolStripTextBoxSearch.ToolTipText = "Search by Serial Number";
             this.toolStripTextBoxSearch.KeyDown += new System.Windows.Forms.KeyEventHandler(this.toolStripTextBoxSearch_KeyDown);
             // 
+            // toolStripLabelSearch
+            // 
+            this.toolStripLabelSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripLabelSearch.Name = "toolStripLabelSearch";
+            this.toolStripLabelSearch.Size = new System.Drawing.Size(45, 22);
+            this.toolStripLabelSearch.Text = "Search:";
+            // 
             // zedGraphControl1
             // 
             this.zedGraphControl1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -177,13 +184,6 @@
             this.zedGraphControl1.TabIndex = 4;
             this.zedGraphControl1.UseExtendedPrintDialog = true;
             // 
-            // toolStripLabelSearch
-            // 
-            this.toolStripLabelSearch.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.toolStripLabelSearch.Name = "toolStripLabelSearch";
-            this.toolStripLabelSearch.Size = new System.Drawing.Size(45, 22);
-            this.toolStripLabelSearch.Text = "Search:";
-            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -194,6 +194,7 @@
             this.Controls.Add(this.statusStripMain);
             this.Controls.Add(this.menuStrip);
             this.MainMenuStrip = this.menuStrip;
+            this.MinimumSize = new System.Drawing.Size(517, 489);
             this.Name = "FormMain";
             this.Text = "Graph Comparator";
             this.Load += new System.EventHandler(this.FormMain_Load);
